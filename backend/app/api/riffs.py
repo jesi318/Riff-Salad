@@ -1,13 +1,14 @@
 import os
 import shutil
-from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from typing import List, Optional
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.riff import Riff
 from pydantic import BaseModel
 from datetime import datetime
 from fastapi.responses import FileResponse
+from app.audio.analysis import analyze_audio_task
 
 router = APIRouter()
 
@@ -20,12 +21,18 @@ class RiffResponse(BaseModel):
     filename: str
     filepath: str
     created_at: datetime
+    analysis_status: str
+    bpm: Optional[float] = None
+    duration: Optional[float] = None
+    energy: Optional[float] = None
+    onset_density: Optional[float] = None
+    midi_filepath: Optional[str] = None
     
     class Config:
         from_attributes = True
 
 @router.post("/", response_model=RiffResponse)
-async def create_riff(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def create_riff(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks(), db: Session = Depends(get_db)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
         
@@ -57,6 +64,9 @@ async def create_riff(file: UploadFile = File(...), db: Session = Depends(get_db
     db.add(db_riff)
     db.commit()
     db.refresh(db_riff)
+    
+    background_tasks.add_task(analyze_audio_task, db_riff.id)
+    
     return db_riff
 
 @router.get("/", response_model=List[RiffResponse])

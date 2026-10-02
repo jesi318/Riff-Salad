@@ -11,3 +11,11 @@ class Riff(Base):
     filepath = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Audio Intelligence Fields
+    analysis_status = Column(String, default="pending")
+    bpm = Column(Float, nullable=True)
+    duration = Column(Float, nullable=True)
+    energy = Column(Float, nullable=True)
+    onset_density = Column(Float, nullable=True)
+    midi_filepath = Column(String, nullable=True)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Play, Pause, Upload, FileAudio, Search } from 'lucide-react';
+import { Play, Pause, Upload, FileAudio, Search, RefreshCw } from 'lucide-react';
 import WaveformPlayer from './components/WaveformPlayer';
 
 const API_URL = 'http://localhost:8000/api/riffs';
@@ -43,7 +43,11 @@ function App() {
     <div className="min-h-screen p-8 max-w-6xl mx-auto">
       <header className="flex justify-between items-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight text-white">RiffVault</h1>
-        <div>
+        <div className="flex gap-4">
+          <button onClick={fetchRiffs} className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded flex items-center gap-2">
+            <RefreshCw size={20} />
+            <span>Refresh</span>
+          </button>
           <label className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded flex items-center gap-2">
             <Upload size={20} />
             <span>Import Riff</span>
@@ -96,14 +100,24 @@ function App() {
                 <WaveformPlayer url={`${API_URL}/${selectedRiff.id}/audio`} />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
                   <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Status</h4>
-                  <p className="text-sm">Audio imported</p>
+                  <p className={`text-sm ${selectedRiff.analysis_status === 'completed' ? 'text-green-400' : selectedRiff.analysis_status === 'failed' ? 'text-red-400' : 'text-yellow-400'}`}>
+                    {selectedRiff.analysis_status || 'unknown'}
+                  </p>
                 </div>
                 <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Intelligence</h4>
-                  <p className="text-sm text-zinc-600 italic">Analysis available in Milestone 2</p>
+                  <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">BPM</h4>
+                  <p className="text-sm font-medium">{selectedRiff.bpm ? Math.round(selectedRiff.bpm) : '--'}</p>
+                </div>
+                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
+                  <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Duration</h4>
+                  <p className="text-sm font-medium">{selectedRiff.duration ? `${selectedRiff.duration.toFixed(1)}s` : '--'}</p>
+                </div>
+                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
+                  <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">MIDI</h4>
+                  <p className="text-sm font-medium">{selectedRiff.midi_filepath ? 'Available' : '--'}</p>
                 </div>
               </div>
             </div>
