@@ -1,0 +1,35 @@
+# Environments
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+env/
+venv/
+ENV/
+
+# Database
+*.db
+*.sqlite3
+backend/riffvault.db
+riffvault.db
+
+# Data / Uploads
+data/
+backend/data/
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,7 +1,156 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Playwrite+AR:wght@100..400&display=swap');
 
 @layer base {
   body {
     @apply bg-zinc-950 text-zinc-100;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+}
+
+/* ── Playing bars animation ─────────────────────────────────────────────── */
+.playing-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5px;
+  height: 12px;
+}
+
+.playing-bars span {
+  display: block;
+  width: 2px;
+  border-radius: 1px;
+  background: white;
+  animation: equalizer 0.8s ease-in-out infinite;
+}
+
+.playing-bars span:nth-child(1) {
+  height: 55%;
+  animation-delay: 0s;
+}
+
+.playing-bars span:nth-child(2) {
+  height: 100%;
+  animation-delay: 0.2s;
+}
+
+.playing-bars span:nth-child(3) {
+  height: 45%;
+  animation-delay: 0.4s;
+}
+
+.playing-bars-sm {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 9px;
+  margin-right: 2px;
+}
+
+.playing-bars-sm span {
+  display: block;
+  width: 2px;
+  border-radius: 1px;
+  background: #60a5fa;
+  animation: equalizer 0.8s ease-in-out infinite;
+}
+
+.playing-bars-sm span:nth-child(1) {
+  height: 55%;
+  animation-delay: 0s;
+}
+
+.playing-bars-sm span:nth-child(2) {
+  height: 100%;
+  animation-delay: 0.2s;
+}
+
+.playing-bars-sm span:nth-child(3) {
+  height: 45%;
+  animation-delay: 0.4s;
+}
+
+@keyframes equalizer {
+
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* ── Riff card hover lift ────────────────────────────────────────────────── */
+.riff-card {
+  transition: background 0.12s ease, padding-left 0.12s ease;
+}
+
+.riff-card:hover {
+  padding-left: 14px;
+}
+
+/* ── New riff highlight ──────────────────────────────────────────────────── */
+@keyframes highlight-in {
+  0% {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  100% {
+    background: transparent;
+  }
+}
+
+.animate-highlight {
+  animation: highlight-in 2s ease-out forwards;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* 1. Style Wrapper for the Editor Canvas */
+
+
+/* 2. Lined Heading Configuration (Playwrite AR) */
+.playwrite-heading {
+  font-family: "Playwrite AR", cursive;
+  font-size: 30px;
+  /* Increased from 96px as requested */
+  font-weight: 300;
+  /* Elegant thin structure */
+  font-style: normal;
+  /* Pure white typography */
+  margin: 0;
+  padding: 8px 16px;
+  display: inline-block;
+
+}
+
+/* 3. Alternative Standard Body Text Configuration (Merriweather) */
+.merriweather-body {
+  font-family: "Merriweather", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: #b3b3b3;
+  /* Soft contrasted white body text */
+  font-variation-settings: "wdth" 100;
 }

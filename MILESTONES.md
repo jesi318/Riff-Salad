@@ -41,6 +41,22 @@ Turn RiffVault into an intelligent searchable archive.
 - [x] AI failures are gracefully handled
 
 ## Milestone 4 — Polish + Demo
-**Status: In Progress**
+**Status: Complete**
 
 Turn the prototype into a polished, convincing hackathon demo.
+- [x] Drag-and-drop file import anywhere on page
+- [x] Debounced search (results update 500ms after last keystroke)
+- [x] Loading skeleton cards while fetching / searching
+- [x] Toast notifications for upload, delete, transcription, and errors
+- [x] Graceful error handling (friendly toasts, not raw errors)
+- [x] Sticky persistent audio player at bottom of screen
+- [x] Spacebar global play/pause shortcut
+- [x] Playing-bar animation on active riff card in sidebar
+- [x] Inline title editing (click-to-rename)
+- [x] Inline BPM / Key manual override (click to edit)
+- [x] Polished empty states for vault and search no-results
+- [x] Processing stage labels ("Analyzing BPM & Key…", "Running AI tagging…")
+- [x] LLM tagging runs automatically during analysis (no separate button)
+- [x] Re-analyze button triggers full analysis + LLM re-tag
+- [x] Inter font, micro-animations, hover lift on riff cards
+- [x] Violet accent color system throughout the UI

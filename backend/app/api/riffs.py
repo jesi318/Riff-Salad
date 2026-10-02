@@ -29,6 +29,11 @@ class RiffResponse(BaseModel):
     energy: Optional[float] = None
     onset_density: Optional[float] = None
     midi_filepath: Optional[str] = None
+    voice_note_transcript: Optional[str] = None
+    user_notes: Optional[str] = None
+    tags: Optional[str] = None
+    ai_description: Optional[str] = None
+    embedding_path: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -129,3 +134,42 @@ def delete_riff(riff_id: int, db: Session = Depends(get_db)):
     db.delete(riff)
     db.commit()
     return {"message": "Riff deleted successfully"}
+
+
+class TitleUpdate(BaseModel):
+    title: str
+
+
+@router.patch("/{riff_id}/title", response_model=RiffResponse)
+def update_title(riff_id: int, body: TitleUpdate, db: Session = Depends(get_db)):
+    """Rename a riff title inline."""
+    riff = db.query(Riff).filter(Riff.id == riff_id).first()
+    if riff is None:
+        raise HTTPException(status_code=404, detail="Riff not found")
+    title = body.title.strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+    riff.title = title
+    db.commit()
+    db.refresh(riff)
+    return riff
+
+
+class MetaUpdate(BaseModel):
+    bpm: Optional[float] = None
+    key: Optional[str] = None
+
+
+@router.patch("/{riff_id}/meta", response_model=RiffResponse)
+def update_meta(riff_id: int, body: MetaUpdate, db: Session = Depends(get_db)):
+    """Manually override BPM or Key metadata."""
+    riff = db.query(Riff).filter(Riff.id == riff_id).first()
+    if riff is None:
+        raise HTTPException(status_code=404, detail="Riff not found")
+    if body.bpm is not None:
+        riff.bpm = body.bpm
+    if body.key is not None:
+        riff.key = body.key.strip() or None
+    db.commit()
+    db.refresh(riff)
+    return riff

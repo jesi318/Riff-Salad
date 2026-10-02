@@ -132,6 +132,11 @@ def analyze_audio_task(riff_id: int):
         # Resample to 22 050 Hz — better performance without quality loss for
         # the features we compute
         y, sr = librosa.load(riff.filepath, sr=22050)
+        
+        # Normalize audio to [-1.0, 1.0] to remove recording volume bias.
+        # This makes RMS energy reflect the crest factor (compression/distortion)
+        # rather than the raw microphone gain.
+        y = librosa.util.normalize(y)
 
         riff.analysis_progress = 0.3
         db.commit()
@@ -150,8 +155,13 @@ def analyze_audio_task(riff_id: int):
         db.commit()
 
         # ── Onset Density ─────────────────────────────────────────────────────
+        # Use sensitive parameters to properly catch fast legato notes (shredding)
         onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-        onsets = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr)
+        onsets = librosa.onset.onset_detect(
+            onset_envelope=onset_env, 
+            sr=sr,
+            pre_max=1, post_max=1, pre_avg=3, post_avg=3, delta=0.05, wait=1
+        )
         onset_density = float(len(onsets) / duration) if duration > 0 else 0.0
 
         # ── Key ───────────────────────────────────────────────────────────────

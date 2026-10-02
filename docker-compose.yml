@@ -1,0 +1,130 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# RiffSalad — one-shot docker compose
+#
+# Usage:
+#   docker compose up          # CPU-only (slower inference)
+#   docker compose up --profile gpu  # NVIDIA GPU passthrough
+#
+# On first boot, the `ollama-init` service pulls the required models.
+# Subsequent boots skip this if the ollama_data volume already has them.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Ollama (LLM + embeddings) ──────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: riffsalad-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    # GPU profile — add `--profile gpu` to enable NVIDIA passthrough
+    profiles: [""]          # always included (no profile filter)
+    deploy:
+      resources:
+        reservations:
+          devices: []       # overridden in gpu profile below
+
+  ollama-gpu:
+    image: ollama/ollama:latest
+    container_name: riffsalad-ollama-gpu
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    profiles: ["gpu"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # ── Model bootstrap (runs once, exits) ────────────────────────────────────
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: riffsalad-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    entrypoint: >
+      sh -c "
+        echo '==> Pulling LLM model (${LLM_MODEL:-qwen2.5:1.5b})…' &&
+        ollama pull ${LLM_MODEL:-qwen2.5:1.5b} &&
+        echo '==> Pulling embedding model (${EMBEDDING_MODEL:-nomic-embed-text})…' &&
+        ollama pull ${EMBEDDING_MODEL:-nomic-embed-text} &&
+        echo '==> Models ready.'
+      "
+    restart: "no"
+
+  # ── FastAPI backend ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: riffsalad-backend
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5:1.5b}
+      - WHISPER_MODEL=${WHISPER_MODEL:-tiny}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-nomic-embed-text}
+      - OLLAMA_HOST=http://ollama:11434
+      - DATA_DIRECTORY=/data
+    volumes:
+      - riffsalad_data:/data
+      - ./backend/riffvault.db:/app/riffvault.db   # persist DB on host
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  # ── React frontend (nginx) ─────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # In compose, the backend is reachable from the browser at localhost:8000
+        # (the port mapping above). Override if deploying behind a reverse proxy.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    container_name: riffsalad-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    driver: local
+  riffsalad_data:
+    driver: local
