@@ -1,51 +1,6 @@
 <div align="center">
 
-<style>
-  /* 1. Import Fonts directly from your package source */
-  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Playwrite+AR:wght@100..400&display=swap');
-
-  /* 2. Style Wrapper for the Editor Canvas */
-  .editor-canvas {/* Deep dark background */
-    padding: 40px;
-
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  /* 3. Lined Heading Configuration (Playwrite AR) */
-  .playwrite-heading {
-    font-family: "Playwrite AR", cursive;
-    font-size: 96px;       /* Set precisely to your app UI selection */
-    font-weight: 300;      /* Elegant thin structure */
-    font-style: normal;       /* Pure white typography */
-    margin: 0;
-    padding: 8px 16px;
-    display: inline-block;
-    
-    /* Perfect horizontal tracking lines styled for dark mode themes */
-    background-image: 
-      linear-gradient(to bottom, transparent 95%, #ffffff 95%), /* Top Boundary */
-      linear-gradient(to top, transparent 95%, #ffffff 95%);   /* Bottom Boundary */
-    background-position: top, bottom;
-    background-size: 100% 1px;
-    background-repeat: no-repeat;
-  }
-
-  /* 4. Alternative Standard Body Text Configuration (Merriweather) */
-  .merriweather-body {
-    font-family: "Merriweather", serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    color: #b3b3b3;        /* Soft contrasted white body text */
-    font-variation-settings: "wdth" 100;
-  }
-</style>
-
-<!-- Live Document Preview Element -->
-<div class="editor-canvas">
-  <h1 class="playwrite-heading">Riff Salad</h1>
-</div>
+<img src="frontend/public/riff-salad-logo.svg" alt="Riff Salad" width="700">
 
 
 
