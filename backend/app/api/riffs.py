@@ -22,7 +22,9 @@ class RiffResponse(BaseModel):
     filepath: str
     created_at: datetime
     analysis_status: str
+    analysis_progress: Optional[float] = 0.0
     bpm: Optional[float] = None
+    key: Optional[str] = None
     duration: Optional[float] = None
     energy: Optional[float] = None
     onset_density: Optional[float] = None
@@ -74,6 +76,18 @@ def read_riffs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     riffs = db.query(Riff).offset(skip).limit(limit).all()
     return riffs
 
+@router.post("/{riff_id}/analyze", response_model=RiffResponse)
+def reanalyze_riff(riff_id: int, background_tasks: BackgroundTasks = BackgroundTasks(), db: Session = Depends(get_db)):
+    riff = db.query(Riff).filter(Riff.id == riff_id).first()
+    if riff is None:
+        raise HTTPException(status_code=404, detail="Riff not found")
+    riff.analysis_status = "pending"
+    riff.analysis_progress = 0.0
+    db.commit()
+    db.refresh(riff)
+    background_tasks.add_task(analyze_audio_task, riff_id)
+    return riff
+
 @router.get("/{riff_id}", response_model=RiffResponse)
 def read_riff(riff_id: int, db: Session = Depends(get_db)):
     riff = db.query(Riff).filter(Riff.id == riff_id).first()
@@ -91,3 +105,27 @@ def get_riff_audio(riff_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Audio file not found on disk")
         
     return FileResponse(riff.filepath)
+
+@router.delete("/{riff_id}")
+def delete_riff(riff_id: int, db: Session = Depends(get_db)):
+    riff = db.query(Riff).filter(Riff.id == riff_id).first()
+    if riff is None:
+        raise HTTPException(status_code=404, detail="Riff not found")
+        
+    # Delete audio file
+    if riff.filepath and os.path.exists(riff.filepath):
+        try:
+            os.remove(riff.filepath)
+        except Exception:
+            pass
+            
+    # Delete MIDI file
+    if riff.midi_filepath and os.path.exists(riff.midi_filepath):
+        try:
+            os.remove(riff.midi_filepath)
+        except Exception:
+            pass
+            
+    db.delete(riff)
+    db.commit()
+    return {"message": "Riff deleted successfully"}

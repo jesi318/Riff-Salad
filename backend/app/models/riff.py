@@ -14,8 +14,16 @@ class Riff(Base):
     
     # Audio Intelligence Fields
     analysis_status = Column(String, default="pending")
+    analysis_progress = Column(Float, default=0.0)
     bpm = Column(Float, nullable=True)
+    key = Column(String, nullable=True)
     duration = Column(Float, nullable=True)
     energy = Column(Float, nullable=True)
     onset_density = Column(Float, nullable=True)
     midi_filepath = Column(String, nullable=True)
+    # Milestone 3 — AI Search
+    voice_note_transcript = Column(String, nullable=True)
+    user_notes = Column(String, nullable=True)
+    tags = Column(String, nullable=True)          # JSON array stored as string
+    ai_description = Column(String, nullable=True)
+    embedding_path = Column(String, nullable=True)

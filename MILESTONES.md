@@ -26,12 +26,21 @@ Make RiffVault understand the audio (BPM, metadata).
 - [x] Existing riffs survive application restart
 
 ## Milestone 3 — AI Search
-**Status: In Progress**
+**Status: Complete**
 
-
-Turn RiffVault into an intelligent searchable archive (Whisper, local LLM, semantic search).
+Turn RiffVault into an intelligent searchable archive.
+- [x] Whisper transcription works locally (faster-whisper)
+- [x] Voice notes are searchable
+- [x] Local LLM generates tags (Ollama, configurable model)
+- [x] Local LLM generates descriptions
+- [x] Natural-language search works (LLM → structured filters → DB)
+- [x] Metadata filtering works (BPM range, key, tags)
+- [x] Semantic search works (sentence-transformers embeddings)
+- [x] Similar-riff search works (cosine similarity)
+- [x] No cloud AI API is required
+- [x] AI failures are gracefully handled
 
 ## Milestone 4 — Polish + Demo
-**Status: Pending**
+**Status: In Progress**
 
 Turn the prototype into a polished, convincing hackathon demo.
